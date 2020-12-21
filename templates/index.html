@@ -1,0 +1,14 @@
+{%extends "layout.html"%}
+{% block content %}
+<div >
+<form onsubmit = "validate_login_form ()" class = "round" action = "http://127.0.0.1:5000/request_login"  method = "post">
+    <label for="name">Username:</label><br>
+    <input type="text" id="user_name" name="user_name" required><br>
+    <label for="surname">Password:</label><br>
+    <input type="password" id="pswd" name="pswd" required><br>
+    <input type="submit" value="login"> <br>
+    <hr>
+    <p>No account? <a href = "http://127.0.0.1:5000/signup">Create one!</a></p>
+</form>
+</div>
+{% endblock content %}
