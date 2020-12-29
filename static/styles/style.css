@@ -19,26 +19,41 @@ input[type=text], select {
   }
   
   input[type=submit] {
-    width: 100%;
-    background-color: #4CAF50;
     color: white;
-    padding: 14px 20px;
-    margin: 8px 0;
     border: none;
     border-radius: 4px;
     cursor: pointer;
   }
-   
-  input[type=submit]:hover {
-    background-color: #45a049;
+
+  #submit {
+    background-color: #4CAF50;
+    width: 100%;
+    padding: 14px 20px;
+    margin: 8px 0;
   }
 
+  #post_button {
+    background-color: rgba(206, 206, 206, 0.918);
+    padding: 8px 20px;
+    margin: 4px 0;
+  }
+   
   div {
     border-radius: 5px;
-    background-color: #c7e1e2;
     padding: 20px;
     margin-top: 100px;
     margin-bottom: 100px;
     margin-right: 550px;
     margin-left: 450px;
   }
+
+  #index_page_div {
+    background-color: white;
+  }
+
+  #other_page_div {
+    border-style: groove;
+    padding: 5px;
+    margin-bottom: 10px;
+  }
+

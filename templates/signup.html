@@ -1,16 +1,41 @@
 {%extends "layout.html"%}
     {% block content %}
-        <div>
-        <form class = "round" action = "http://127.0.0.1:5000/request_signup" method = "post">
-            <br><label for="user_name">Name:</label><br>
-            <input type="text" name="user_name" placeholder="Name" required><br>
-            <label for="user_surname">Surname:</label><br>
-            <input type="text" name="user_surname" placeholder="Surname" required><br>
-            <label for="email">E mail:</label><br>
-            <input type="text" name="email" placeholder="someone@example.com" required><br>
-            <label for="pswd">Password:</label><br>
-            <input type="password" name="pswd"><br>
-            <input type="submit" value="Submit"><br>
+        <body style = "background-image: url('/static/img/bg_img.jpg');
+                       background-size: cover;">
+        <div id = "index_page_div">
+            <form action="{{ url_for ('request_signup') }}"
+             onsubmit="return validate_signup_form ()"
+             method="post" id="signup_form">
+
+                <a href = "{{ url_for('home') }}"> 
+                    <img src="{{ url_for('static', filename='img/back.png') }}"
+                     width="40" height="40"/>
+                </a><br>
+
+                <label for="user_name">Name:</label><br>
+                <input type="text" id="user_name" name="user_name"
+                 placeholder="Name" required><br>
+
+                <label for="user_id">E mail:</label><br>
+                <input type="text" id="user_id" name="user_id"
+                 placeholder="someone@example.com" required><br>
+
+                <label for="password">Password:</label><br>
+                <input type="password" id="password" name="password" required><br>
+
+                <label for="confirm_password">Confirm Password:</label><br>
+                <input type="password" id="confirm_password"
+                 name="confirm_password" required><br>
+
+                <p id="signup_response">
+                    {%if response%}
+                        {{response}}
+                    {%endif%}
+                </p>
+                <hr>
+
+                <input type="submit" id ="submit" value="Sign up"><br>
         </form>
         </div>
+        </body>
     {% endblock content %}

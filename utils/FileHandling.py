@@ -1,5 +1,7 @@
 import os
 
+#========================================================================================
+
 def readFileInBinary (file_path):
         file_data = None
         try:
@@ -10,6 +12,8 @@ def readFileInBinary (file_path):
             print (str(e))
         return file_data
 
+#========================================================================================
+
 def writeFileInBinary (file_path, file_data):
     try:
         file_handle = open (file_path, 'wb')
@@ -17,3 +21,5 @@ def writeFileInBinary (file_path, file_data):
         file_handle.close ()
     except Exception as e:
         print (str (e))
+
+#========================================================================================
