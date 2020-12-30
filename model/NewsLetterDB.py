@@ -1,8 +1,6 @@
 import sqlite3
 import os
 
-dbfile = './model/database/NewsLetter.db'
-#dbfile = './database/NewsLetter.db'
 #========================================================================================
                         # Queries applied on User Table
 CREATE_USER_TABLE = """CREATE TABLE USER (user_id TEXT PRIMARY KEY,
@@ -14,8 +12,8 @@ INSERT_INTO_USER = "INSERT INTO USER VALUES (?,?,?,?)"
 
 GET_ALL_USERS_INFO = "SELECT user_id, name FROM USER"
 
-GET_USER_INFO = """SELECT user_id, name, profile_img FROM USER WHERE
-                   user_id = ? AND password = ?"""
+GET_USER_INFO = """SELECT user_id, name, profile_img, password FROM USER WHERE
+                   user_id = ? """
 
 SET_PASSWORD = "UPDATE USER SET password = ? WHERE user_id = ?"
 
@@ -34,7 +32,7 @@ CREATE_FEED_TABLE = """CREATE TABLE FEEDS (post_id INT NOT NULL PRIMARY KEY,
 
 class DataBaseManager:
     _instance = None
-    def __new__ (cls):
+    def __new__ (cls, dbfile = './model/database/NewsLetter.db'):
         if (cls._instance is None):
             cls._instance = object.__new__ (cls)
             cls._instance.dbfile = dbfile
@@ -58,19 +56,18 @@ class DataBaseManager:
 #========================================================================================
 
     def insertUserRecordInTable (self, user_record):
-        user_id = user_record[0]
-        user_name = user_record[1]
-        password = user_record[2]
-        profile_img = user_record[3]
         try:
             self.connector =  sqlite3.connect (self.dbfile)
             self.dbcursor = self.connector.cursor()
-            self.dbcursor.execute (INSERT_INTO_USER, (user_id, user_name, password, profile_img))
+            self.dbcursor.execute (INSERT_INTO_USER, (user_record[0], user_record[1],
+                                                      user_record[2], user_record[3]))
             self.connector.commit ()
             self.connector.close ()
         except sqlite3.IntegrityError as error:
+            print ("insertUserRecordInTable:sqlite3.IntegrityError")
             return str(error)
         except Exception as other_error:
+            print ("insertUserRecordInTable")
             print (str(other_error))
 
 #========================================================================================
@@ -85,22 +82,24 @@ class DataBaseManager:
             self.connector.commit ()
             self.connector.close ()
         except Exception as e:
+            print ("fetchAllFromUserTable: ")
             print (str (e))
         return user_record
 
 #========================================================================================
 
-    def fetchOneUserRecord (self, user_id, password):
+    def fetchOneUserRecord (self, user_id):
         #This function will return user_id, name, profile_img
         user_record = None
         try:
             self.connector =  sqlite3.connect (self.dbfile)
             self.dbcursor = self.connector.cursor()
-            self.dbcursor.execute (GET_USER_INFO, (user_id, password))
+            self.dbcursor.execute (GET_USER_INFO, [user_id])
             user_record = self.dbcursor.fetchone ()
             self.connector.commit ()
             self.connector.close ()
         except Exception as e:
+            print ("fetchOneUserRecord: ")
             print (str(e))
         return user_record
 
@@ -109,7 +108,7 @@ class DataBaseManager:
     def updatePasswordInUserRecord (self, user_id, old_password, new_password):
         #This function will update the password of the user
         try: 
-            user_record = fetchOneUserRecord (user_id, old_password)
+            user_record = fetchOneUserRecord (user_id)
             if (user_record):
                 self.connector =  sqlite3.connect (self.dbfile)
                 self.dbcursor = self.connector.cursor()
@@ -119,11 +118,12 @@ class DataBaseManager:
             else:
                 return -1
         except Exception as e:
+            print ("updatePasswordInUserRecord")
             print (str (e))
 
 #========================================================================================
 
 if (__name__ == "__main__"):
-    user_db = DataBaseManager ()
+    user_db = DataBaseManager ('./database/NewsLetter.db')
     print (id (user_db))
     user_db.CreateTables ()

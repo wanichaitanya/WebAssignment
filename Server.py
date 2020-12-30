@@ -15,7 +15,7 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = os.urandom(16)
 app.config['SESSION_TYPE'] = 'filesystem'
 app.config['SESSION_USE_SIGNER'] = True
-app.config['SESSION_FILE_DIR'] = 'D:\\Python_Projects\\MainApp_x01\\tmp'
+app.config['SESSION_FILE_DIR'] = './tmp'
 
 server_session = Session (app)
 
@@ -29,8 +29,6 @@ if (__name__ == "__main__"):
 @app.before_first_request
 def server_startup ():
     user_db = get_user_db ()
-    #print (id(user_db))
-
 #========================================================================================
 
 @app.route('/', methods=['GET', 'POST'])
@@ -58,8 +56,12 @@ def request_signup():
 
 #========================================================================================
 
-@app.route('/home', methods=['GET', 'POST'])
-def home():
-    return render_template ("home.html", title = 'Home')
+@app.route('/home/<user_id>', methods=['GET', 'POST'])
+def home(user_id):
+    user_info = session.get('user_info')
+    if(user_info is None or user_id != str(user_info[0])):
+        return redirect (url_for ('index')) 
+    else:
+        return render_template ("home.html", title = 'Home')
 
 #========================================================================================
