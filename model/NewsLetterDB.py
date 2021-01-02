@@ -20,13 +20,13 @@ SET_PASSWORD = "UPDATE USER SET password = ? WHERE user_id = ?"
 #========================================================================================
                         #Queries applied on Feeds table
 
-CREATE_FEED_TABLE = """CREATE TABLE FEEDS (post_id INT PRIMARY KEY,
+'''CREATE_FEED_TABLE = """CREATE TABLE FEEDS (post_id INT PRIMARY KEY,
                                            content TEXT NOT NULL,
                                            file_data blob,
                                            is_single_file bool, 
                                            user_id TEXT NOT NULL,
                                            FOREIGN KEY (user_id)
-                                           REFERENCES USER (user_id))"""
+                                           REFERENCES USER (user_id))"""'''
 
 CREATE_FEED_TABLE = """CREATE TABLE FEEDS (post_id INT PRIMARY KEY AUTOINCREMENT,
                                            content TEXT NOT NULL, 
