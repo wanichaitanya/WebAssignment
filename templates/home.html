@@ -1,11 +1,25 @@
 {%extends "layout.html"%}
-{% block content %}
-<div id = "other_page_div">
-    <input type="text" id="post" name="post"
-     placeholder="Post a feed" required><br>
-    <input type="submit" id ="post_button" value="Post"><br>
-</div>
 
-<div id = "other_page_div">
-</div>
+{% block head %}
+{{ super() }}
+    <meta http-equiv="refresh" content="60">
+{% endblock head %}
+
+{% block content %}
+
+<body onload='onLoadPerformTasks("{{session['user_info'][0]}}")'>
+    <form method="post" id="home_form">
+        <ul>
+            <li style="float:left"><a class="active"
+                    href="{{url_for ('home', user_id = session['user_info'][0] ) }}">Home</a></li>
+            <li style="float:right"><a class="active"
+                    href="{{url_for ('logout', user_id = session['user_info'][0] ) }}">Logout</a></li>
+        </ul>
+
+        <div id="new_feed_div">
+            <input type="text" id="post" name="post" placeholder="Post a feed" required><br>
+            <input type="submit" id="post_button" value="Post"><br>
+        </div>
+    </form>
+</body>
 {% endblock content %}

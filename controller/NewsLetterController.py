@@ -1,9 +1,8 @@
 import sys
 import socket
-from flask import Flask, session, g, render_template, request, redirect, url_for
+from flask import Flask, session, g, render_template, request, redirect, url_for, jsonify, make_response
 from flask_session import Session
 from werkzeug.security import generate_password_hash, check_password_hash
-from jinja2 import escape
 
 sys.path.append ('.')
 sys.path.append ('../')
@@ -36,7 +35,7 @@ def user_login ():
         return render_template ("index.html", response = DATABASE_CONNECTIVITY_ERROR_MSG,
                                 title = 'Login')# Instead of html render, write this message in log file
     if (request.method == 'POST'):
-        user_id = escape(request.form ['user_id'])
+        user_id = request.form ['user_id']
         password = request.form['password']
         user_record = user_db.fetchOneUserRecord (user_id)
         if ((user_record is not None) and check_password_hash(user_record[3], password)):
@@ -45,10 +44,9 @@ def user_login ():
             set_user_session_data (user_record[0],
                                    request.environ.get('HTTP_X_REAL_IP', request.remote_addr),
                                    user_record[1])
-            
+            return redirect (url_for('home', user_id = user_id))
         else:
             return render_template ("index.html", response = USER_LOGIN_ERROR_MSG, title = 'Login')
-        return redirect (url_for('home', user_id = user_id))
 
 #========================================================================================
 
@@ -56,6 +54,7 @@ def user_signup ():
     result = None
     user_db = get_user_db ()
     if (request.method == 'POST'):
+        print (request.form)
         user_name = request.form ['user_name']
         user_id = request.form ['user_id']
 
@@ -74,3 +73,19 @@ def user_signup ():
     return redirect (url_for('home', user_id = user_id))
 
 #========================================================================================
+
+def get_feeds ():
+    user_info = request.get_json()
+    if (request.method == 'POST' and user_info is not None):
+        user_info_from_session = session.get('user_info')
+        if (user_info_from_session is not None and user_info_from_session[0] == user_info['user_id']):
+            data = user_info_from_session[2]
+            #query database and get feeds data
+            dict_data = {
+               "Key" : data
+            }
+            json_data = jsonify (dict_data)
+            response = make_response (json_data, 200)
+            return response
+        else:
+            return redirect (url_for ('index', title = 'Login'))

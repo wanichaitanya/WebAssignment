@@ -8,7 +8,6 @@ const USER_ID_PASSWORD_VALIDATION_MSG = "Invalid User ID and Password";
 
 response_text = ""
 /*========================================================================================*/
-
 function validate_login_form ()
 {
     const form = document.getElementById ('login_form');

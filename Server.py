@@ -56,12 +56,27 @@ def request_signup():
 
 #========================================================================================
 
+@app.route('/get_data', methods=['GET', 'POST'])
+def get_data():
+    return get_feeds ()
+
+#========================================================================================
+
 @app.route('/home/<user_id>', methods=['GET', 'POST'])
 def home(user_id):
     user_info = session.get('user_info')
     if(user_info is None or user_id != str(user_info[0])):
-        return redirect (url_for ('index')) 
+        return redirect (url_for ('index', title = 'Login')) 
     else:
         return render_template ("home.html", title = 'Home')
+
+#========================================================================================
+
+@app.route('/logout/<user_id>', methods=['GET', 'POST'])
+def logout(user_id):
+    user_info = session.get('user_info')
+    if(user_info is not None and user_id == str(user_info[0])):
+        session.pop ('user_info', None)
+    return redirect (url_for ('index', title = 'Login'))
 
 #========================================================================================

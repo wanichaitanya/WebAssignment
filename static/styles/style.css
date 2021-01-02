@@ -36,24 +36,59 @@ input[type=text], select {
     background-color: rgba(206, 206, 206, 0.918);
     padding: 8px 20px;
     margin: 4px 0;
+    color: black;
   }
    
   div {
     border-radius: 5px;
-    padding: 20px;
-    margin-top: 100px;
-    margin-bottom: 100px;
+    background-color: white;
     margin-right: 550px;
     margin-left: 450px;
   }
 
-  #index_page_div {
-    background-color: white;
+  #index_page_div { 
+    padding: 20px;
+    margin-bottom: 100px;
+    margin-top: 100px;
   }
 
-  #other_page_div {
+  #new_feed_div {
     border-style: groove;
-    padding: 5px;
-    margin-bottom: 10px;
+    margin-top: 10px;
+    padding: 0.4%;
+  }
+
+  #show_feed_div {
+    border-style: groove;
+    margin-top: 10px;
+    padding: 0.4%;
+  }
+
+  .show_feed_div_class {
+    border-style: groove;
+    margin-top: 10px;
+    padding: 0.4%;
+    color: black;
+    background-color: #4CAF50;
+  }
+
+  ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: white ;
+  }
+  
+  li a {
+    display: block;
+    color: white;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+  }
+  
+  .active {
+    background-color: #4CAF50;
   }
 
