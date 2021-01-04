@@ -1,14 +1,15 @@
 import sqlite3
 import os
-
+import datetime
 #========================================================================================
                         # Queries applied on User Table
 CREATE_USER_TABLE = """CREATE TABLE USER (user_id TEXT PRIMARY KEY,
                                           name TEXT NOT NULL,
                                           password TEXT NOT NULL,
-                                          profile_img blob)"""
+                                          profile_img blob,
+                                          account_creation_date TEXT)"""
 
-INSERT_INTO_USER = "INSERT INTO USER VALUES (?,?,?,?)"
+INSERT_INTO_USER = "INSERT INTO USER VALUES (?,?,?,?,?)"
 
 GET_ALL_USERS_INFO = "SELECT user_id, name FROM USER"
 
@@ -20,19 +21,31 @@ SET_PASSWORD = "UPDATE USER SET password = ? WHERE user_id = ?"
 #========================================================================================
                         #Queries applied on Feeds table
 
-'''CREATE_FEED_TABLE = """CREATE TABLE FEEDS (post_id INT PRIMARY KEY,
+'''CREATE_FEED_TABLE = """CREATE TABLE FEEDS (post_id INTEGER PRIMARY KEY,
                                            content TEXT NOT NULL,
                                            file_data blob,
-                                           is_single_file bool, 
+                                           is_single_file bool,
+                                           post_creation_date TEXT,
+                                           location TEST NOT NULL,
                                            user_id TEXT NOT NULL,
                                            FOREIGN KEY (user_id)
                                            REFERENCES USER (user_id))"""'''
 
-CREATE_FEED_TABLE = """CREATE TABLE FEEDS (post_id INT PRIMARY KEY AUTOINCREMENT,
-                                           content TEXT NOT NULL, 
+CREATE_FEED_TABLE = """CREATE TABLE FEEDS (post_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                                           content TEXT NOT NULL,
+                                           post_creation_date TEXT,
+                                           location TEST NOT NULL,
                                            user_id TEXT NOT NULL,
                                            FOREIGN KEY (user_id)
                                            REFERENCES USER (user_id))"""
+
+INSERT_INTO_FEEDS = "INSERT INTO FEEDS (content, post_creation_date, location, user_id) VALUES (?,?,?,?)"
+
+#later arrange this data as per the date posted
+GET_ALL_FEEDS = """SELECT USER.name, USER.user_id, FEEDS.post_id, FEEDS.content, FEEDS.post_creation_date, FEEDS.location
+                   FROM USER, FEEDS WHERE USER.user_id = FEEDS.user_id"""
+
+DELETE_FEED = "DELETE FROM FEEDS WHERE FEEDS.post_id = ? and FEEDS.user_id = ?"
 
 #========================================================================================
 
@@ -65,8 +78,10 @@ class DataBaseManager:
         try:
             self.connector =  sqlite3.connect (self.dbfile)
             self.dbcursor = self.connector.cursor()
+            creation_date = str(datetime.datetime.now ().date())
             self.dbcursor.execute (INSERT_INTO_USER, (user_record[0], user_record[1],
-                                                      user_record[2], user_record[3]))
+                                                      user_record[2], user_record[3],
+                                                      creation_date))
             self.connector.commit ()
             self.connector.close ()
         except sqlite3.IntegrityError as error:
@@ -129,7 +144,64 @@ class DataBaseManager:
 
 #========================================================================================
 
+    def insertFeedsDataInTable (self, feed_data):
+        try:
+            self.connector =  sqlite3.connect (self.dbfile)
+            self.dbcursor = self.connector.cursor()
+            post_creation_date = str(datetime.datetime.now ().date())
+
+            self.dbcursor.execute (INSERT_INTO_FEEDS, (feed_data[0], #post_content
+                                                      post_creation_date, #posting date
+                                                      feed_data[1], #location from post is created
+                                                      feed_data[2])) #user_id (foreign key)
+            self.connector.commit ()
+            self.connector.close ()
+        except sqlite3.IntegrityError as error:
+            print ("insertFeedsDataInTable:sqlite3.IntegrityError")
+            return str(error)
+        except Exception as other_error:
+            print ("insertFeedsDataInTable")
+            print (str(other_error))
+
+#========================================================================================
+
+    def fetchAllFromFeedsTable (self):
+        #This function will return feeds data
+        try:
+            self.connector =  sqlite3.connect (self.dbfile)
+            self.dbcursor = self.connector.cursor()
+            self.dbcursor.execute (GET_ALL_FEEDS)
+            feeds_data = self.dbcursor.fetchall ()
+            self.connector.commit ()
+            self.connector.close ()
+        except Exception as e:
+            print ("fetchAllFromFeedsTable: ")
+            print (str (e))
+        return feeds_data
+
+#========================================================================================
+
+    def deleteFeedsDataFromTable (self, post_id, user_id):
+        try:
+            self.connector =  sqlite3.connect (self.dbfile)
+            self.dbcursor = self.connector.cursor()
+            post_creation_date = str(datetime.datetime.now ().date())
+
+            self.dbcursor.execute (DELETE_FEED, (post_id, user_id))
+            self.connector.commit ()
+            self.connector.close ()
+        except sqlite3.IntegrityError as error:
+            print ("deleteFeedsDataFromTable:sqlite3.IntegrityError")
+            return str(error)
+        except Exception as other_error:
+            print ("deleteFeedsDataFromTable")
+            print (str(other_error))
+        
+
+#========================================================================================
+
 if (__name__ == "__main__"):
     user_db = DataBaseManager ('./database/NewsLetter.db')
     print (id (user_db))
     user_db.CreateTables ()
+

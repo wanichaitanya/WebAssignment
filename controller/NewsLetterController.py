@@ -18,6 +18,7 @@ DATABASE_CONNECTIVITY_ERROR_MSG = 'Database connectivity problem'
 #========================================================================================
 def set_user_session_data (user_id, ip_addr, user_name):
     session ['user_info'] = [user_id, ip_addr, user_name]
+    #TODO: Instead of ip_addr add location
 
 #========================================================================================
 user_db = None
@@ -54,7 +55,6 @@ def user_signup ():
     result = None
     user_db = get_user_db ()
     if (request.method == 'POST'):
-        print (request.form)
         user_name = request.form ['user_name']
         user_id = request.form ['user_id']
 
@@ -74,18 +74,55 @@ def user_signup ():
 
 #========================================================================================
 
-def get_feeds ():
-    user_info = request.get_json()
-    if (request.method == 'POST' and user_info is not None):
-        user_info_from_session = session.get('user_info')
-        if (user_info_from_session is not None and user_info_from_session[0] == user_info['user_id']):
-            data = user_info_from_session[2]
-            #query database and get feeds data
-            dict_data = {
-               "Key" : data
-            }
-            json_data = jsonify (dict_data)
-            response = make_response (json_data, 200)
-            return response
+def get_feeds (user_id):
+        dict_data = []
+        user_info = session.get ('user_info')
+        if (user_id is not None and user_info is not None and user_id == user_info[0]):
+            feed_data_from_db = user_db.fetchAllFromFeedsTable ()
+            for item in feed_data_from_db:
+
+                if (user_id == item[1]):
+                    self_post_by_user = 1
+                else:
+                    self_post_by_user = 0
+
+                feed_data = {'user_name': item[0], 'user_id': item[1],
+                             'post_id': item[2], 'content': item[3],
+                             'date': item[4], 'location': item[5],
+                             'self_post_by_user' : self_post_by_user}
+
+                dict_data.append (feed_data)
+            return render_template ('home.html', user_id = user_id, title = 'Home', res = dict_data)
         else:
             return redirect (url_for ('index', title = 'Login'))
+
+#========================================================================================
+
+def insert_feed_in_db ():
+    user_info = session.get('user_info')
+    user_id = user_info[0]
+    location = "Pune"
+    status_code = 200
+    response_text = "SUCCESS"
+    result = None
+    if (request.method == 'POST'):
+        post_content = request.form ['post']
+        feeds_data = (post_content, location, user_id)
+        result = user_db.insertFeedsDataInTable (feeds_data)
+        if (result is not None):
+            status_code = 500
+            response_text = "PROBLEM OCCURED WHILE STORING THE NEW FEED"
+        
+        response = {
+            "response" : response_text
+        }        
+        json_response = jsonify (response)
+        return redirect (url_for ('home', user_id = user_id, title = 'Home')) 
+
+#========================================================================================
+
+def delete_feed_from_db (post_id):
+    user_info = session.get('user_info')
+    user_id = user_info[0]
+    user_db.deleteFeedsDataFromTable (post_id, user_id)
+    return redirect (url_for('home', user_id = user_id))

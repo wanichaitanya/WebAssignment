@@ -6,9 +6,7 @@
 {% endblock head %}
 
 {% block content %}
-
-<body onload='onLoadPerformTasks("{{session['user_info'][0]}}")'>
-    <form method="post" id="home_form">
+    <form action="{{ url_for ('post_feed') }}" method="post" id="home_form">
         <ul>
             <li style="float:left"><a class="active"
                     href="{{url_for ('home', user_id = session['user_info'][0] ) }}">Home</a></li>
@@ -21,5 +19,27 @@
             <input type="submit" id="post_button" value="Post"><br>
         </div>
     </form>
-</body>
+
+    <div id = "parent_feed_div">
+        {%for feed_data in res%}
+            <div id="show_feed_div">
+                <span class="user_name">
+                    {{feed_data.user_name}}
+                </span>
+                <span class="location">
+                    {{feed_data.location}}
+                </span>
+                {%if feed_data.self_post_by_user == 1%}
+                <a href="{{url_for ('delete_post', post_id=feed_data.post_id) }}">
+                    <button id="button">Delete</button>
+                </a>
+                {%endif%}
+                <br>
+                <hr>
+                <p>
+                    {{feed_data.content}}
+                </p>
+            </div>
+        {%endfor%}
+    </div>
 {% endblock content %}

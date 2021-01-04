@@ -56,19 +56,13 @@ def request_signup():
 
 #========================================================================================
 
-@app.route('/get_data', methods=['GET', 'POST'])
-def get_data():
-    return get_feeds ()
-
-#========================================================================================
-
 @app.route('/home/<user_id>', methods=['GET', 'POST'])
 def home(user_id):
     user_info = session.get('user_info')
     if(user_info is None or user_id != str(user_info[0])):
         return redirect (url_for ('index', title = 'Login')) 
     else:
-        return render_template ("home.html", title = 'Home')
+        return get_feeds (user_id)
 
 #========================================================================================
 
@@ -79,4 +73,17 @@ def logout(user_id):
         session.pop ('user_info', None)
     return redirect (url_for ('index', title = 'Login'))
 
+#========================================================================================
+
+@app.route('/post_feed', methods=['GET', 'POST'])
+def post_feed ():
+    return insert_feed_in_db ()
+    
+#========================================================================================
+
+
+@app.route('/delete_post/<post_id>', methods=['GET', 'POST'])
+def delete_post (post_id):
+    return delete_feed_from_db (post_id)
+    
 #========================================================================================
