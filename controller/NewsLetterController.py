@@ -1,5 +1,6 @@
 import sys
 import socket
+import threading
 from flask import Flask, session, g, render_template, request, redirect, url_for, jsonify, make_response
 from flask_session import Session
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -11,14 +12,15 @@ sys.path.append ('../utils')
 
 from model import NewsLetterDB
 from utils.FileHandling import *
+from utils.GeoLocations import get_country_from_ip
 
 USER_SIGNUP_ERROR_MSG = 'User is already registered with same email address!'
 USER_LOGIN_ERROR_MSG = 'Invalid User ID or Password'
 DATABASE_CONNECTIVITY_ERROR_MSG = 'Database connectivity problem'
 #========================================================================================
-def set_user_session_data (user_id, ip_addr, user_name):
-    session ['user_info'] = [user_id, ip_addr, user_name]
-    #TODO: Instead of ip_addr add location
+
+def set_user_session_data (user_id, ip_addr, country, user_name):
+    session ['user_info'] = [user_id, ip_addr, country, user_name]
 
 #========================================================================================
 user_db = None
@@ -38,14 +40,15 @@ def user_login ():
     if (request.method == 'POST'):
         user_id = request.form ['user_id']
         password = request.form['password']
+        ip_addr = request.form['ip_address']
         user_record = user_db.fetchOneUserRecord (user_id)
         if ((user_record is not None) and check_password_hash(user_record[3], password)):
-            #file_path = "./tmp/"+user_record[1]+".jpg"
-            #writeFileInBinary (file_path, user_record[2])
+            location = get_country_from_ip (ip_addr)
             set_user_session_data (user_record[0],
-                                   request.environ.get('HTTP_X_REAL_IP', request.remote_addr),
+                                   ip_addr,
+                                   location,
                                    user_record[1])
-            return redirect (url_for('home', user_id = user_id))
+            return redirect (url_for ('home', user_id = user_id))
         else:
             return render_template ("index.html", response = USER_LOGIN_ERROR_MSG, title = 'Login')
 
@@ -57,7 +60,7 @@ def user_signup ():
     if (request.method == 'POST'):
         user_name = request.form ['user_name']
         user_id = request.form ['user_id']
-
+        ip_addr = request.form['ip_address']
         password = request.form ['password']
         hashed_password = generate_password_hash(password)
         profile_img = readFileInBinary ("D:\\Photos\\IMG_20200430_194913379.jpg")
@@ -67,10 +70,12 @@ def user_signup ():
         if (result == "UNIQUE constraint failed: USER.user_id"):
             return render_template ("signup.html", response = USER_SIGNUP_ERROR_MSG)
         else:
+            location = get_country_from_ip (ip_addr)
             set_user_session_data (user_id,
-                                   request.environ.get('HTTP_X_REAL_IP', request.remote_addr),
+                                   ip_addr,
+                                   location,
                                    user_name)
-    return redirect (url_for('home', user_id = user_id))
+    return redirect (url_for ('home', user_id = user_id))
 
 #========================================================================================
 
@@ -92,7 +97,9 @@ def get_feeds (user_id):
                              'self_post_by_user' : self_post_by_user}
 
                 dict_data.append (feed_data)
-            return render_template ('home.html', user_id = user_id, title = 'Home', res = dict_data)
+            return render_template ('home.html', user_id = user_id,
+                                    user_name = user_info[3],
+                                    title = 'Home', res = dict_data)
         else:
             return redirect (url_for ('index', title = 'Login'))
 
@@ -100,8 +107,14 @@ def get_feeds (user_id):
 
 def insert_feed_in_db ():
     user_info = session.get('user_info')
+    if (user_info is None):
+        redirect (url_for ('index', title = 'Login'))
     user_id = user_info[0]
-    location = "Pune"
+    location = user_info[2]
+
+    if (location == "N/A"):
+        new_location = get_country_from_ip (user_info[1])
+        session['user_info'][2] = new_location
     status_code = 200
     response_text = "SUCCESS"
     result = None

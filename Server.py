@@ -59,7 +59,7 @@ def request_signup():
 @app.route('/home/<user_id>', methods=['GET', 'POST'])
 def home(user_id):
     user_info = session.get('user_info')
-    if(user_info is None or user_id != str(user_info[0])):
+    if(user_info is None or user_id != user_info[0]):
         return redirect (url_for ('index', title = 'Login')) 
     else:
         return get_feeds (user_id)

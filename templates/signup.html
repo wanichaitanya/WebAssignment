@@ -1,6 +1,7 @@
 {%extends "layout.html"%}
     {% block content %}
-        <body style = "background-image: url('/static/img/bg_img.jpg');
+        <body onload="get_ip_address ()"
+        style = "background-image: url('/static/img/bg_img.jpg');
                        background-size: cover;">
         <div id = "index_page_div">
             <form action="{{ url_for ('request_signup') }}"
@@ -19,6 +20,8 @@
                 <label for="user_id">E mail:</label><br>
                 <input type="text" id="user_id" name="user_id"
                  placeholder="someone@example.com" required><br>
+
+                 <input type="hidden" id="ip_address" name="ip_address">
 
                 <label for="password">Password:</label><br>
                 <input type="password" id="password" name="password" required><br>

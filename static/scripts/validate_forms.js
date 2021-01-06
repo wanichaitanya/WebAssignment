@@ -7,14 +7,35 @@ const PASSWORD_VALIDATION_MSG5 = "Invalid password format";
 const USER_ID_PASSWORD_VALIDATION_MSG = "Invalid User ID and Password";
 
 response_text = ""
+
+function get_ip_address ()
+{
+    let request = new XMLHttpRequest ();
+    request.open ("GET", "https://api.ipify.org");
+    request.send ();
+    console.log (this.responseText)
+    request.onreadystatechange = function ()
+    {
+        if (this.readyState == 4 && this.status == 200)
+        {
+            document.getElementById('ip_address').value = this.responseText;
+            return true;
+        }
+        else 
+            return false;
+    };
+}
+
 /*========================================================================================*/
 function validate_login_form ()
 {
     const form = document.getElementById ('login_form');
     const user_id = document.getElementById ('user_id');
     const password = document.getElementById ('password');
+    const ip_addr = document.getElementById('ip_address').value;
     const user_id_value = user_id.value.trim ();
     const password_value = password.value.trim ();
+    //get_ip_address ();
     if (!validate_user_id_and_password (user_id_value, password_value, null))
     {
         document.getElementById ('index_response').innerHTML = response_text;
@@ -39,6 +60,7 @@ function validate_signup_form ()
     const confirm_password = document.getElementById ('confirm_password');
     submit = document.getElementById ('signup');
 
+    //get_ip_address ();
     const user_id_value = user_id.value.trim ();
     const password_value = password.value.trim ();
     const confirm_password_value = confirm_password.value.trim ();

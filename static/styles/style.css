@@ -41,7 +41,7 @@ input[type=text], select {
 
   button {
     background-color: rgba(110, 190, 77, 1);
-    padding: 8px 20px;
+    padding: 4px 10px;
     margin: 4px 0;
     color: black;
   }
@@ -71,6 +71,7 @@ input[type=text], select {
   }
 
   #show_feed_div {
+    margin-top: 5px;
     max-width: 650px;
     padding: 20px;
     margin: 30px auto;
@@ -85,7 +86,7 @@ input[type=text], select {
   
   .location {
     color: rgb(136, 136, 136);
-    float: left;
+    float: right;
   }
 
   ul {

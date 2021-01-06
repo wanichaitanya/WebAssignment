@@ -157,6 +157,7 @@ class DataBaseManager:
             self.connector.commit ()
             self.connector.close ()
         except sqlite3.IntegrityError as error:
+            print (feed_data)
             print ("insertFeedsDataInTable:sqlite3.IntegrityError")
             return str(error)
         except Exception as other_error:
