@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import
 {
     Entity,
@@ -8,6 +9,7 @@ import
     CreateDateColumn, 
     UpdateDateColumn, 
     ManyToOne,
+    JoinColumn
 } from "typeorm";
 import { v4 as uuidv4 } from 'uuid';
 import { User } from './users.entity';
@@ -16,7 +18,7 @@ import { User } from './users.entity';
 export class Feeds extends BaseEntity
 {
     @PrimaryColumn("uuid")
-    id:string;
+    feedId:string;
 
     @Column ("text")
     content:string;
@@ -33,10 +35,14 @@ export class Feeds extends BaseEntity
     @BeforeInsert ()
     addUUId ()
     {
-        this.id = uuidv4();
+        this.feedId = uuidv4();
     }
 
-    @ManyToOne(() => User, (user:User) => user.id)
-    userId: string;
+    @Column()
+    userId:string;
+
+    @ManyToOne(() => User, (user:User) => user.feeds)
+    @JoinColumn ({name:"userId"})
+    user: User;
 }
 

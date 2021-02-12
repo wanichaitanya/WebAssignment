@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Response } from 'express';
@@ -14,75 +15,64 @@ export class UserService
         private userRepository: Repository<User>
       ) {}
 
-    async userSignUp (response:Response, emailId:string, userName:string, non_hashed_password:string):Promise<Response>
+    async userSignUp (emailId:string, userName:string, non_hashed_password:string):Promise<number>
     {
+        let result:number;
         try
         {   
             const password:string = md5(non_hashed_password);
             const user = this.userRepository.create ({emailId,userName,password});
             await user.save ();
-            response.status (201)
-            .json ({"response": "USER_CREATED_SUCCESSFULLY"})
-            .send();                           
+            result = 200;
         }
         catch (error)
         {
-            if (Number(error.code) == 23505)
+            if (error.code == 23505)
             {
-                response.status (409)
-                .json ({"response": "USER_ALREADY_REGISTERED"})
+                result = 409;
+                return result;
             }
             else
-            {
-                response.status (500)
-                .json ({"response": error.message})
-            }
+                throw new Error(error);
         }
-        return response;
+
+        return result;
     }
 
-    async userLogin (response:Response, emailId:string, password:string):Promise<Response>
+    async userLogin (emailId:string, password:string):Promise<User>
     {
         try
         {    
             const user:User = await this.userRepository
-            .createQueryBuilder("User")
+            .createQueryBuilder()
             .where("User.emailId = :emailId", { emailId: emailId })
             .andWhere ("User.password = :password", {password : md5(password)})
+            .select ("User.userId")
             .getOne();
-
-            if (user != null)
-            {
-                response.status (200)
-                .json ({"response": "LOGIN_SUCCESSFUL"});
-            }
-            else
-            {
-                response.status (401)
-                .json ({"response": "INVALID_CREDENTIALS"});
-            }
+            return user;
         }
         catch (error)
         {
-            response.status (401)
-            .json ({"response": error.message})
+            throw new Error(error);
         }
-
-        return response;
     }
 
-    async getAllUsers (response:Response):Promise<Response>
+    async getAllUsers ():Promise<{ userId: string; emailId: string; userName: string; }[]>
     {
+        let users:User[];
         try
         {
-            const users:User[] = await this.userRepository.query(`select U."id", U."userName", U."emailId" from public."User" as U`);
-            response.json (users);               
+            users = await this.userRepository
+                            .createQueryBuilder("User")
+                            .select ("User.userId")
+                            .addSelect ("User.userName")
+                            .addSelect ("User.emailId")
+                            .getMany ();
+            return users;                
         }
         catch (error)
         {
-            response.status (500)
-            .json ({"response": error.message})
-        }
-        return response;    
+            throw new Error(error);
+        }   
     }
 }

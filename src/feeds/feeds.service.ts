@@ -1,8 +1,10 @@
+/* eslint-disable prettier/prettier */
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from 'typeorm';
-import { Feeds } from "src/orm/entity/feeds.entity";
+import { Feeds } from "../orm/entity/feeds.entity";
 import { Response } from 'express';
+import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class FeedsService
@@ -12,40 +14,28 @@ export class FeedsService
         private feedRepository: Repository<Feeds>
     ) {}
 
-    async createFeedRecordInDB (response:Response,
-                                content:string,
+    async createFeedRecordInDB (content:string,
                                 location:string, 
-                                userId:string): Promise<Response>
+                                userId:string):Promise<number>
     {
         try
         {
-            const feed:Feeds = this.feedRepository.create ({content,location,userId});
-            await feed.save ();
-            response.status (201)
-            .json({"response": "POST_CREATED"});
+            const feedId:string = uuidv4 ();
+            await this.feedRepository.
+                        createQueryBuilder().
+                        insert ().
+                        into (Feeds).
+                        values ({feedId, content, location, userId}).
+                        execute(); 
+            return 200;
         }
         catch (error)
         {
-            if (Number(error.code) == 23503)
-            {
-                response.status (409).
-                json({"response": "FORIEGN_KEY_VIOLATION"});   
-            }
-            else if (Number(error.code) == 23502)
-            {
-                response.status (422).
-                json({"response": "INVALID_DATA_PASSED"});
-            }
-            else
-            {
-                response.status (500).
-                json({"response": error.message});   
-            }
-            return response;
+            throw new Error (error);
         }
     }
 
-    async deleteFeedRecordFromDB (response:Response, feedId:string):Promise<Response>
+    async deleteFeedRecordFromDB (feedId:string):Promise<number>
     {
         try
         {
@@ -53,22 +43,18 @@ export class FeedsService
             .createQueryBuilder()
             .delete ()
             .from(Feeds)
-            .where("id = :id", { id: feedId })
+            .where("feedId = :feedId", { feedId: feedId })
             .execute();
     
-            response.status (204).
-            json({"response": "POST_DELETED_SUCCESSFULLY"});
+            return 204;
         }
         catch (error)
         {
-            response.status (500).
-            json({"response": "Problem occured while deleting the post"});
+            throw new Error (error);
         }
-
-        return response;
     }
 
-    async updateFeedRecordInDB (response:Response, feedId:string, content:string):Promise<Response>
+    async updateFeedRecordInDB (feedId:string, content:string):Promise<number>
     {
         try
         {
@@ -76,34 +62,48 @@ export class FeedsService
             .createQueryBuilder()
             .update(Feeds)
             .set({ content: content})
-            .where("id = :id", { id: feedId })
+            .where("feedId = :feedId", { feedId: feedId })
             .execute();
-    
-            response.status (204).
-            json({"response": "POST_UPDATED_SUCCESSFULLY"});
+            return 204;
         }
         catch (error)
         {
-            response.status (500).
-            json({"response": "Problem occured while updating the post"});
+            throw new Error (error)
         }
-        return response;
     }
 
-    async getAllFeedsFromDB(response:Response):Promise<Response>
+    async getAllFeedsFromDB():
+    Promise<Feeds[]>
+    {
+        let feeds:Feeds[];
+        try
+        {
+            feeds = await this.feedRepository.find({relations: []});
+        }
+        catch (error)
+        {            
+            throw error;
+        }
+
+        return feeds;
+    }
+
+    async getFeedFromDB(feedID:string):Promise<Feeds>
     {
         try
         {
-            const feeds:Feeds[] = await this.feedRepository.find();
-            response.status (200).
-            json({"feeds": feeds});
+            const feed:Feeds = await this.feedRepository
+                                .createQueryBuilder()
+                                .select ("Feeds.content")
+                                .addSelect ("Feeds.updateionDate")
+                                .where("Feeds.feedId = :feedId", { feedId: feedID })
+                                .getOne ();
+            return feed;                    
         }
         catch (error)
         {
-            response.status (500).
-            json({"response": error});
+            console.log(error);
+            
         }
-
-        return response;
     }
 }

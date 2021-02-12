@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import
 {
     Entity, 
@@ -7,21 +8,17 @@ import
     BeforeInsert, 
     Unique, 
     CreateDateColumn,
+    OneToMany,
 } from "typeorm";
 import { v4 as uuidv4 } from 'uuid';
+import { Feeds } from "./feeds.entity";
 
 @Entity({name: "User"})
 @Unique("unique-emailId", ["emailId"])
 export class User extends BaseEntity
 {
-    public response = 
-    {
-        responseStatus : 200,
-        responseJson: {}
-    };
-
     @PrimaryColumn("uuid")
-    id:string;
+    userId:string;
 
     @Column("varchar", {length: 255})
     emailId: string;
@@ -38,7 +35,10 @@ export class User extends BaseEntity
     @BeforeInsert ()
     addUUId ()
     {
-        this.id = uuidv4();
+        this.userId = uuidv4();
     }
+
+    @OneToMany (() => Feeds, (feed:Feeds) => feed.user)
+    feeds:Feeds[];
 }
 
