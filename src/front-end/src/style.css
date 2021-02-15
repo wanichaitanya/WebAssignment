@@ -1,0 +1,90 @@
+input[type=text], select {
+    width: 25%;
+    margin: 8px 0;
+    padding: 12px 20px;
+    display: inline-block;
+    border: 1px solid rgb(226, 202, 202);
+    border-radius: 4px;
+    box-sizing: border-box;
+  }
+  
+  input[type=password], select {
+    width: 25%;
+    margin: 8px 0;
+    padding: 12px 20px;
+    display: inline-block;
+    border: 1px solid rgb(226, 202, 202);
+    border-radius: 4px;
+    box-sizing: border-box;
+  }
+
+  .submit {
+    color: white;
+    margin: 8px 0;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    background-color: rgba(110, 190, 77, 1);
+    width: 25%;
+  }
+
+  .post_button {
+    background-color: rgba(110, 190, 77, 1);
+    color: black;
+  }
+
+  .button {
+    background-color: rgba(110, 190, 77, 1);
+    color: black;
+  }
+
+  .body  {
+    background-color: rgba(246, 246, 246, 0.733)
+  }
+   
+  div {
+    background-color: white;
+  }
+
+  #index_page_div { 
+    border-radius: 5px;
+  }
+
+  .new-feed-div {
+    border-style: hidden;
+    box-shadow: 3px 3px 3px rgba(0, 0, 0, 0.1);
+  }
+
+  .show_feed_div {
+    overflow: auto;
+  }
+
+  .user_name {
+    font-weight: normal;
+    float: left;
+  }
+  
+  .location {
+    color: rgb(136, 136, 136);
+    float: right;
+  }
+
+  ul {
+    list-style-type: none;
+    overflow: hidden;
+    background-color: rgba(77, 88, 90, 1);
+  }
+  
+  li a {
+    display: block;
+    color: white;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+  }
+  
+  .active {
+    background-color: rgba(110, 190, 77, 1);
+  }
+
