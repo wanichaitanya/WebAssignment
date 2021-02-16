@@ -6,6 +6,8 @@ import { UserModule } from './users/users.module';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 import configuration from '../config/config';
+import { User } from './orm/entity/users.entity';
+import { Feeds } from './orm/entity/feeds.entity';
 
 const ConnectionOptions:TypeOrmModuleOptions = 
 {
@@ -23,10 +25,18 @@ const ConnectionOptions:TypeOrmModuleOptions =
 @Module({
   imports:
   [
-    ConfigModule.forRoot({
-      load: [configuration],
-    }),
-    TypeOrmModule.forRoot (ConnectionOptions),
+    TypeOrmModule.forRoot (
+      {
+        type:"postgres",
+        host:"localhost",
+        port:5432,
+        username:"postgres",
+        password:"test",
+        synchronize:true,
+        dropSchema: false,
+        entities: [User, Feeds],
+        database: "NewsLetter"
+      }),
     UserModule,
     FeedsModule
   ],

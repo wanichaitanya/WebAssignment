@@ -10,21 +10,10 @@ describe ('User service', () =>
     let userService: UserService;
     afterEach (async () =>
     {
-        const connection:Connection = getConnection ();
         try
         {
-            await connection
-            .createQueryBuilder()
-            .delete()
-            .from (Feeds)
-            .execute ();
-
-            await connection
-            .createQueryBuilder()
-            .delete()
-            .from (User)
-            .execute ();
-
+            const connection:Connection = getConnection ();
+            await connection.getRepository(User).delete ({});
             await connection.close ();
         }
         catch (error)

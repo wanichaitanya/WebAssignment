@@ -15,15 +15,15 @@ export class FeedsController
         try
         {
             const result:number = await this.feedsService.createFeedRecordInDB (content, location, userId);
-        }
-        catch (error)
-        {
-            if (error.code == 200)
+            if (result == 200)
             {
                 response.status (200).
                 json({"response": "POST_CREATED"});   
             }
-            else if (error.code == 23503)
+        }
+        catch (error)
+        {
+            if (error.code == 23503)
             {
                 response.status (409).
                 json({"response": "FORIEGN_KEY_VIOLATION"});   
@@ -46,8 +46,11 @@ export class FeedsController
     {
         try 
         {
-            const result = await this.feedsService.deleteFeedRecordFromDB (feedId);
-            response.status (result).json ({"response":"Post deleted"});
+            const result:number = await this.feedsService.deleteFeedRecordFromDB (feedId);
+            if (result > 0)
+                response.status (200).json ({"response":"Post deleted"});
+            else
+                response.status (401).json ({"response":"Invalid Feeds Id"});
         }
         catch (error)
         {
@@ -61,7 +64,10 @@ export class FeedsController
         try
         {
             const result:number = await this.feedsService.updateFeedRecordInDB (feedId, content);
-            response.status (result).json ({response: "Post Updated"});
+            if (result > 0)
+                response.status (200).json ({"response":"Post Updated"});
+            else
+                response.status (401).json ({"response":"Invalid Feeds Id"});
         }
         catch (error)
         {

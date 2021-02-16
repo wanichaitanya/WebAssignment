@@ -1,10 +1,11 @@
 /* eslint-disable prettier/prettier */
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from 'typeorm';
+import { DeleteResult, Repository, UpdateResult } from 'typeorm';
 import { Feeds } from "../orm/entity/feeds.entity";
 import { Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
+import { User } from "src/orm/entity/users.entity";
 
 @Injectable()
 export class FeedsService
@@ -21,12 +22,14 @@ export class FeedsService
         try
         {
             const feedId:string = uuidv4 ();
-            await this.feedRepository.
-                        createQueryBuilder().
-                        insert ().
-                        into (Feeds).
-                        values ({feedId, content, location, userId}).
-                        execute(); 
+            const feed:Feeds = this.feedRepository.create (
+                {
+                    feedId, 
+                    content, 
+                    location, 
+                    userId
+                });
+            feed.save ();
             return 200;
         }
         catch (error)
@@ -39,14 +42,9 @@ export class FeedsService
     {
         try
         {
-            await this.feedRepository
-            .createQueryBuilder()
-            .delete ()
-            .from(Feeds)
-            .where("feedId = :feedId", { feedId: feedId })
-            .execute();
-    
-            return 204;
+            const result:DeleteResult = 
+            await this.feedRepository.delete({feedId:feedId});
+            return result.affected;
         }
         catch (error)
         {
@@ -58,13 +56,13 @@ export class FeedsService
     {
         try
         {
-            await this.feedRepository
-            .createQueryBuilder()
-            .update(Feeds)
-            .set({ content: content})
-            .where("feedId = :feedId", { feedId: feedId })
-            .execute();
-            return 204;
+            const updateResult:UpdateResult =
+            await this.feedRepository.update (
+            feedId, 
+            {
+                content: content
+            });
+            return updateResult.affected;
         }
         catch (error)
         {
@@ -78,7 +76,10 @@ export class FeedsService
         let feeds:Feeds[];
         try
         {
-            feeds = await this.feedRepository.find({relations: []});
+            feeds = await this.feedRepository.find({
+                    cache: false, 
+                    relations: []
+                });
         }
         catch (error)
         {            
@@ -93,12 +94,29 @@ export class FeedsService
         try
         {
             const feed:Feeds = await this.feedRepository
-                                .createQueryBuilder()
-                                .select ("Feeds.content")
-                                .addSelect ("Feeds.updateionDate")
-                                .where("Feeds.feedId = :feedId", { feedId: feedID })
-                                .getOne ();
+                                .findOne (
+                                {
+                                    cache: false,
+                                    select: ["content", "updateionDate"],
+                                    where: 
+                                    {
+                                        feedId: feedID
+                                    }
+                                });
             return feed;                    
+        }
+        catch (error)
+        {
+            console.log(error);
+            
+        }
+    }
+
+    async clearAllData()
+    {
+        try
+        {
+            await this.feedRepository.delete (undefined);
         }
         catch (error)
         {

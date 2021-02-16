@@ -21,7 +21,7 @@ export class UserService
         try
         {   
             const password:string = md5(non_hashed_password);
-            const user = this.userRepository.create ({emailId,userName,password});
+            const user:User = await this.userRepository.create ({emailId,userName,password});
             await user.save ();
             result = 200;
         }
@@ -43,12 +43,16 @@ export class UserService
     {
         try
         {    
-            const user:User = await this.userRepository
-            .createQueryBuilder()
-            .where("User.emailId = :emailId", { emailId: emailId })
-            .andWhere ("User.password = :password", {password : md5(password)})
-            .select ("User.userId")
-            .getOne();
+             const user:User = await this.userRepository.findOne (
+            {
+                cache: false,
+                select: ["userId"],
+                where: 
+                {
+                    emailId: emailId,
+                    password: md5(password)
+                }
+            });
             return user;
         }
         catch (error)
@@ -59,20 +63,32 @@ export class UserService
 
     async getAllUsers ():Promise<{ userId: string; emailId: string; userName: string; }[]>
     {
-        let users:User[];
         try
         {
-            users = await this.userRepository
-                            .createQueryBuilder("User")
-                            .select ("User.userId")
-                            .addSelect ("User.userName")
-                            .addSelect ("User.emailId")
-                            .getMany ();
+            const users:User[] = await this.userRepository
+            .find (
+            {
+                cache: false,
+                select: ["userId", "userName", "emailId"]
+            });
             return users;                
         }
         catch (error)
         {
             throw new Error(error);
         }   
+    }
+
+    async clearAllData ()
+    {
+        try
+        {
+            await this.userRepository.delete (undefined);
+        }
+        catch (error)
+        {
+            console.log(error);
+            
+        }
     }
 }
