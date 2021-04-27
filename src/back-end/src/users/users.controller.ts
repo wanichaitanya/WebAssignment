@@ -3,7 +3,6 @@ import { Res } from '@nestjs/common';
 import { Controller, Get, Post, Body } from '@nestjs/common';
 import { Response } from 'express';
 import { UserService } from './users.service';
-import {User} from '../orm/entity/users.entity';
 @Controller('/users')
 export class UserController
 {
